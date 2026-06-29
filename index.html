@@ -11,97 +11,109 @@
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
         body { font-family: 'Inter', sans-serif; background-color: #f8fafc; color: #1e293b; }
         .card { background: white; border-radius: 16px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); }
-        .date-btn { transition: all 0.2s; min-width: 100px; }
-        .date-active { background-color: #2563eb; color: white; box-shadow: 0 10px 15px -3px rgba(37, 99, 235, 0.4); transform: translateY(-2px); }
+        .date-btn { transition: all 0.2s; min-width: 90px; }
+        .date-active { background-color: #2563eb; color: white; box-shadow: 0 8px 12px -3px rgba(37, 99, 235, 0.3); transform: translateY(-1px); }
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-        .section-title { font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: #64748b; margin-bottom: 0.75rem; display: flex; items-center: center; gap: 0.5rem; }
-        .content-text { font-size: 0.9375rem; line-height: 1.6; color: #334155; }
-        .highlight-box { background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%); border: 1px solid #bfdbfe; }
+        .nav-tab { position: relative; padding-bottom: 8px; font-weight: 600; color: #94a3b8; transition: all 0.2s; }
+        .nav-tab.active { color: #2563eb; }
+        .nav-tab.active::after { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 3px; background: #2563eb; border-radius: 10px; }
+        .announcement-item { border-left: 3px solid #3b82f6; padding-left: 12px; margin-bottom: 12px; }
     </style>
 </head>
-<body class="pb-12">
+<body class="pb-24">
     <div id="app" class="max-w-md mx-auto px-5 pt-8">
         <!-- Header -->
-        <header class="flex justify-between items-start mb-8">
+        <header class="flex justify-between items-start mb-6">
             <div>
                 <h1 class="text-3xl font-extrabold text-slate-900 tracking-tight">Notice Board</h1>
-                <p class="text-slate-500 font-medium mt-1">Transition Program 2026-27</p>
+                <p class="text-slate-500 font-medium mt-1">Transition Program</p>
             </div>
-            <button onclick="fetchData()" class="p-2.5 bg-white rounded-xl shadow-sm border border-slate-100 text-slate-400 hover:text-blue-600 transition-colors">
-                <i data-lucide="refresh-cw" class="w-5 h-5" id="refresh-icon"></i>
-            </button>
+            <div class="flex gap-2">
+                <button onclick="jumpToToday()" class="flex items-center gap-1.5 px-3 py-2 bg-blue-50 text-blue-600 rounded-xl text-xs font-bold hover:bg-blue-100 transition-colors">
+                    <i data-lucide="calendar-days" class="w-4 h-4"></i> TODAY
+                </button>
+                <button onclick="fetchData()" class="p-2.5 bg-white rounded-xl shadow-sm border border-slate-100 text-slate-400 hover:text-blue-600 transition-colors">
+                    <i data-lucide="refresh-cw" class="w-4 h-4" id="refresh-icon"></i>
+                </button>
+            </div>
         </header>
 
-        <!-- Date Navigation -->
-        <div class="mb-8">
-            <div class="flex items-center justify-between mb-3 px-1">
-                <span class="text-sm font-bold text-slate-400">Select Date</span>
-                <span id="last-updated" class="text-[10px] text-slate-400 uppercase font-bold">Live Syncing...</span>
-            </div>
-            <div class="overflow-x-auto whitespace-nowrap py-3 no-scrollbar flex gap-3" id="date-nav">
-                <!-- Date buttons injected here -->
-            </div>
-        </div>
+        <!-- Main Navigation Tabs -->
+        <nav class="flex gap-8 mb-8 border-b border-slate-100 px-1">
+            <button onclick="switchTab('dashboard')" id="tab-dashboard" class="nav-tab active">Dashboard</button>
+            <button onclick="switchTab('contacts')" id="tab-contacts" class="nav-tab">Contacts</button>
+            <button onclick="switchTab('notices')" id="tab-notices" class="nav-tab">Notices</button>
+        </nav>
 
-        <!-- Main Content -->
+        <!-- Main Content Area -->
         <main id="main-content">
             <!-- Loading State -->
             <div id="loading" class="flex flex-col items-center justify-center py-24">
-                <div class="w-12 h-12 border-4 border-blue-100 border-t-blue-600 rounded-full animate-spin mb-4"></div>
-                <p class="text-slate-400 font-medium">Fetching latest updates...</p>
+                <div class="w-10 h-10 border-4 border-blue-100 border-t-blue-600 rounded-full animate-spin mb-4"></div>
+                <p class="text-slate-400 font-medium">Syncing...</p>
             </div>
 
-            <!-- Dashboard View -->
-            <div id="dashboard-view" class="hidden space-y-6">
-                
+            <!-- DASHBOARD TAB -->
+            <div id="view-dashboard" class="space-y-6">
+                <!-- Date Navigation -->
+                <div class="mb-6">
+                    <div class="flex items-center justify-between mb-3 px-1">
+                        <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Select Date</span>
+                        <span id="last-updated" class="text-[9px] text-slate-300 font-bold">---</span>
+                    </div>
+                    <div class="overflow-x-auto whitespace-nowrap py-2 no-scrollbar flex gap-2" id="date-nav"></div>
+                </div>
+
                 <!-- Date Header -->
                 <div class="flex items-center gap-3 mb-2 px-1">
-                    <div class="h-8 w-1.5 bg-blue-600 rounded-full"></div>
-                    <h2 id="display-date" class="text-xl font-bold text-slate-800">---</h2>
+                    <div class="h-6 w-1 bg-blue-600 rounded-full"></div>
+                    <h2 id="display-date" class="text-lg font-bold text-slate-800">---</h2>
                 </div>
 
                 <!-- WAH Card -->
-                <section id="wah-section" class="card p-6 border-t-4 border-amber-400">
-                    <div class="section-title">
+                <section class="card p-5 border-t-4 border-amber-400">
+                    <div class="flex items-center gap-2 mb-4">
                         <i data-lucide="home" class="w-4 h-4 text-amber-500"></i>
-                        Work at Home (WAH)
+                        <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">Work at Home</span>
                     </div>
-                    <div id="wah-content" class="content-text space-y-3">
-                        <p class="text-slate-400 italic">No specific tasks for today.</p>
-                    </div>
+                    <div id="wah-content" class="text-sm text-slate-600 space-y-3"></div>
                 </section>
 
                 <!-- Lessons Card -->
-                <section id="lessons-section" class="card p-6 border-t-4 border-emerald-400">
-                    <div class="section-title">
+                <section class="card p-5 border-t-4 border-emerald-400">
+                    <div class="flex items-center gap-2 mb-4">
                         <i data-lucide="book-open" class="w-4 h-4 text-emerald-500"></i>
-                        Today's Lessons
+                        <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">Today's Lessons</span>
                     </div>
-                    <div id="lessons-content" class="space-y-5">
-                        <!-- Lessons injected here -->
-                    </div>
+                    <div id="lessons-content" class="space-y-5"></div>
                 </section>
+            </div>
 
-                <!-- General Notice Card -->
-                <section id="notice-section" class="mt-10">
-                    <div class="section-title px-1">
-                        <i data-lucide="megaphone" class="w-4 h-4 text-blue-500"></i>
-                        General Announcements
-                    </div>
-                    <div id="notice-content" class="card p-6 highlight-box">
-                        <p class="text-slate-400 italic">Loading notices...</p>
-                    </div>
-                </section>
+            <!-- CONTACTS TAB -->
+            <div id="view-contacts" class="hidden space-y-4">
+                <h2 class="text-xl font-bold text-slate-800 mb-4 px-1">Teacher Contacts</h2>
+                <div id="contacts-list" class="space-y-4">
+                    <!-- Contacts will be injected here -->
+                </div>
+                <div class="p-4 bg-blue-50 rounded-2xl border border-blue-100 mt-6">
+                    <p class="text-xs text-blue-700 leading-relaxed">
+                        <strong>Note:</strong> To inform about absenteeism / early dispersal, please email the homerooms directly.
+                    </p>
+                </div>
+            </div>
+
+            <!-- NOTICES TAB -->
+            <div id="view-notices" class="hidden space-y-4">
+                <h2 class="text-xl font-bold text-slate-800 mb-4 px-1">General Notices</h2>
+                <div id="notices-list" class="card p-6 bg-slate-50 border border-slate-100">
+                    <!-- Notices injected here -->
+                </div>
             </div>
         </main>
 
-        <footer class="mt-12 text-center space-y-2">
-            <div class="flex items-center justify-center gap-2 text-slate-300">
-                <div class="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse"></div>
-                <span class="text-[10px] font-bold uppercase tracking-widest">Real-time Dashboard</span>
-            </div>
-            <a href="https://docs.google.com/spreadsheets/d/1u25ZzFmpIy51tpL6xwfGQ7ndZI6n1RsliWgXlDgvRfI/edit" target="_blank" class="text-xs text-blue-500/60 hover:text-blue-600 font-medium transition-colors">View Source Spreadsheet</a>
+        <footer class="mt-12 text-center">
+            <a href="https://docs.google.com/spreadsheets/d/1u25ZzFmpIy51tpL6xwfGQ7ndZI6n1RsliWgXlDgvRfI/edit" target="_blank" class="text-[10px] text-slate-300 font-bold uppercase tracking-widest hover:text-blue-400 transition-colors">Source Spreadsheet</a>
         </footer>
     </div>
 
@@ -111,12 +123,14 @@
         const GID_NOTICE = '502021398';
 
         let dailyData = [];
-        let noticeData = "";
+        let noticeData = [];
+        let contactData = [];
         let selectedDateStr = "";
+        let currentTab = 'dashboard';
 
         async function fetchData() {
             const icon = document.getElementById('refresh-icon');
-            icon.classList.add('animate-spin');
+            if (icon) icon.classList.add('animate-spin');
             
             try {
                 const dailyUrl = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=${GID_DAILY}`;
@@ -128,14 +142,14 @@
                 ]);
 
                 parseDailyData(dailyRes);
-                parseNoticeData(noticeRes);
+                parseNoticeAndContactData(noticeRes);
                 
-                document.getElementById('last-updated').innerText = 'Updated: ' + new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                document.getElementById('last-updated').innerText = 'UPDATED ' + new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
                 renderApp();
             } catch (error) {
                 console.error("Fetch error:", error);
             } finally {
-                setTimeout(() => icon.classList.remove('animate-spin'), 500);
+                if (icon) setTimeout(() => icon.classList.remove('animate-spin'), 500);
             }
         }
 
@@ -168,121 +182,170 @@
             }
             dailyData = processed;
             
-            // Default to the first date if not set
             if (!selectedDateStr && dailyData.length > 0) {
                 selectedDateStr = dailyData[0].date;
             }
         }
 
-        function parseNoticeData(csv) {
+        function parseNoticeAndContactData(csv) {
             const results = Papa.parse(csv, { header: false }).data;
-            let html = "";
+            let notices = [];
+            let contacts = [];
+            let isContactSection = false;
+
             results.forEach(row => {
-                const text = row.filter(c => c && c.trim()).join(" ");
-                if (text.trim()) {
-                    if (text.includes("Class Notice Board")) {
-                        html += `<h3 class="font-bold text-blue-900 mb-2">${text}</h3>`;
-                    } else {
-                        html += `<p class="text-blue-800/80 mb-3 last:mb-0">${text}</p>`;
+                const text = row.filter(c => c && c.trim()).join(" ").trim();
+                if (!text) return;
+
+                // Check for contact section start (usually names and emails)
+                if (text.toLowerCase().includes("email addresses") || text.toLowerCase().includes("names") && text.toLowerCase().includes("subjects")) {
+                    isContactSection = true;
+                    return;
+                }
+
+                if (isContactSection) {
+                    // Try to parse contact rows: Name, Subject, Email
+                    if (row.length >= 3 && row[2].includes("@")) {
+                        contacts.push({ name: row[0], subject: row[1], email: row[2] });
+                    }
+                } else {
+                    if (!text.toLowerCase().includes("class notice board") && text.length > 10) {
+                        notices.push(text);
                     }
                 }
             });
-            noticeData = html || "No current announcements.";
+            noticeData = notices;
+            contactData = contacts;
+        }
+
+        function switchTab(tab) {
+            currentTab = tab;
+            ['dashboard', 'contacts', 'notices'].forEach(t => {
+                document.getElementById(`view-${t}`).classList.toggle('hidden', t !== tab);
+                document.getElementById(`tab-${t}`).classList.toggle('active', t === tab);
+            });
+            renderApp();
+        }
+
+        function jumpToToday() {
+            // Find today's date in the data
+            // Since sheet dates are like "Mon, 22 Jun", we'll try a fuzzy match
+            const now = new Date();
+            const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+            const todayStr = `${now.getDate()} ${months[now.getMonth()]}`;
+            
+            const found = dailyData.find(d => d.date.includes(todayStr));
+            if (found) {
+                selectedDateStr = found.date;
+                switchTab('dashboard');
+            } else if (dailyData.length > 0) {
+                selectedDateStr = dailyData[0].date; // Fallback to first
+                switchTab('dashboard');
+            }
         }
 
         function renderApp() {
             document.getElementById('loading').classList.add('hidden');
-            document.getElementById('dashboard-view').classList.remove('hidden');
             
-            renderDateNav();
-            updateDisplay();
+            if (currentTab === 'dashboard') {
+                renderDateNav();
+                updateDashboardDisplay();
+            } else if (currentTab === 'contacts') {
+                renderContacts();
+            } else if (currentTab === 'notices') {
+                renderNotices();
+            }
             
-            document.getElementById('notice-content').innerHTML = noticeData;
             lucide.createIcons();
         }
 
         function renderDateNav() {
             const nav = document.getElementById('date-nav');
             nav.innerHTML = "";
-            
             const uniqueDates = [...new Set(dailyData.map(d => d.date))];
             
             uniqueDates.forEach(dateStr => {
                 const btn = document.createElement('button');
                 const isActive = dateStr === selectedDateStr;
-                btn.className = `date-btn px-5 py-2.5 rounded-2xl text-sm font-bold border transition-all flex-shrink-0 ${isActive ? 'date-active border-blue-600' : 'bg-white text-slate-500 border-slate-100 hover:border-slate-300'}`;
+                btn.className = `date-btn px-4 py-2 rounded-xl text-xs font-bold border transition-all flex-shrink-0 ${isActive ? 'date-active border-blue-600' : 'bg-white text-slate-400 border-slate-100'}`;
                 btn.innerText = dateStr;
                 btn.onclick = () => {
                     selectedDateStr = dateStr;
                     renderDateNav();
-                    updateDisplay();
+                    updateDashboardDisplay();
                 };
                 nav.appendChild(btn);
             });
+            
+            // Auto scroll to active button
+            const activeBtn = nav.querySelector('.date-active');
+            if (activeBtn) activeBtn.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
         }
 
-        function updateDisplay() {
+        function updateDashboardDisplay() {
             document.getElementById('display-date').innerText = selectedDateStr;
-            
             const dayEntries = dailyData.filter(d => d.date === selectedDateStr);
             const wah = dayEntries.find(d => d.component.toLowerCase().includes('wah'));
             const lesson = dayEntries.find(d => d.component.toLowerCase().includes('lesson'));
 
-            // Update WAH
+            // WAH
             const wahContainer = document.getElementById('wah-content');
             if (wah) {
                 let html = "";
-                const fields = [
-                    { label: 'Morning Circle', val: wah.morningCircle },
-                    { label: 'English', val: wah.english },
-                    { label: 'Art', val: wah.art },
-                    { label: 'Details', val: wah.other }
-                ];
+                const fields = [{l:'Circle', v:wah.morningCircle}, {l:'English', v:wah.english}, {l:'Art', v:wah.art}, {l:'Details', v:wah.other}];
                 fields.forEach(f => {
-                    if (f.val && f.val.trim()) {
-                        html += `<div><span class="font-bold text-amber-900/40 text-[10px] uppercase block mb-0.5">${f.label}</span><p class="text-amber-900/80">${f.val}</p></div>`;
-                    }
+                    if (f.v && f.v.trim()) html += `<div><span class="text-[9px] font-black text-amber-500 uppercase block">${f.l}</span><p class="text-amber-900/80 font-medium">${f.v}</p></div>`;
                 });
-                wahContainer.innerHTML = html || "<p class='text-slate-400 italic'>No specific tasks listed.</p>";
+                wahContainer.innerHTML = html || "<p class='text-slate-400 italic'>No specific tasks.</p>";
             } else {
-                wahContainer.innerHTML = "<p class='text-slate-400 italic'>No WAH listed for this date.</p>";
+                wahContainer.innerHTML = "<p class='text-slate-400 italic'>No WAH listed.</p>";
             }
 
-            // Update Lessons
+            // Lessons
             const lessonContainer = document.getElementById('lessons-content');
             lessonContainer.innerHTML = "";
             if (lesson) {
-                const fields = [
-                    { label: 'Morning Circle', val: lesson.morningCircle },
-                    { label: 'English', val: lesson.english },
-                    { label: 'Art', val: lesson.art },
-                    { label: 'Other', val: lesson.other }
-                ];
+                const fields = [{l:'Morning Circle', v:lesson.morningCircle}, {l:'English', v:lesson.english}, {l:'Art', v:lesson.art}, {l:'Other', v:lesson.other}];
                 fields.forEach(f => {
-                    if (f.val && f.val.trim()) {
+                    if (f.v && f.v.trim()) {
                         const div = document.createElement('div');
-                        div.className = "group";
-                        div.innerHTML = `
-                            <div class="flex items-center gap-2 mb-1.5">
-                                <div class="w-1.5 h-1.5 rounded-full bg-emerald-400"></div>
-                                <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">${f.label}</span>
-                            </div>
-                            <p class="text-slate-700 leading-relaxed pl-3.5 border-l border-slate-100">${f.val}</p>
-                        `;
+                        div.innerHTML = `<div class="flex items-center gap-2 mb-1"><div class="w-1 h-1 rounded-full bg-emerald-400"></div><span class="text-[9px] font-bold text-slate-400 uppercase tracking-tighter">${f.l}</span></div><p class="text-slate-700 text-sm leading-relaxed pl-3 border-l border-slate-100">${f.v}</p>`;
                         lessonContainer.appendChild(div);
                     }
                 });
             } else {
-                lessonContainer.innerHTML = "<p class='text-slate-400 italic'>No lesson plan details available.</p>";
+                lessonContainer.innerHTML = "<p class='text-slate-400 italic'>No lesson details.</p>";
             }
-
-            lucide.createIcons();
         }
 
-        // Auto-refresh every 5 minutes
-        setInterval(fetchData, 300000);
-        
-        // Initial fetch
+        function renderContacts() {
+            const list = document.getElementById('contacts-list');
+            if (contactData.length === 0) {
+                list.innerHTML = "<p class='text-slate-400 italic p-4'>Contact list is empty in the sheet.</p>";
+                return;
+            }
+            list.innerHTML = contactData.map(c => `
+                <div class="card p-4 flex items-center justify-between">
+                    <div>
+                        <h3 class="font-bold text-slate-800">${c.name}</h3>
+                        <p class="text-xs text-slate-500 font-medium">${c.subject}</p>
+                    </div>
+                    <a href="mailto:${c.email}" class="p-2 bg-blue-50 text-blue-600 rounded-lg">
+                        <i data-lucide="mail" class="w-4 h-4"></i>
+                    </a>
+                </div>
+            `).join('');
+        }
+
+        function renderNotices() {
+            const list = document.getElementById('notices-list');
+            if (noticeData.length === 0) {
+                list.innerHTML = "<p class='text-slate-400 italic'>No active notices.</p>";
+                return;
+            }
+            list.innerHTML = noticeData.map(n => `<div class="announcement-item"><p class="text-sm text-slate-600 leading-relaxed">${n}</p></div>`).join('');
+        }
+
         fetchData();
     </script>
 </body>
