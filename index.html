@@ -7,40 +7,62 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        dark: {
+                            bg: '#0f172a',
+                            card: '#1e293b',
+                            text: '#f1f5f9',
+                            muted: '#94a3b8'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
-        body { font-family: 'Inter', sans-serif; background-color: #f8fafc; color: #1e293b; }
-        .card { background: white; border-radius: 16px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); }
-        .date-btn { transition: all 0.2s; min-width: 90px; }
-        .date-active { background-color: #2563eb; color: white; box-shadow: 0 8px 12px -3px rgba(37, 99, 235, 0.3); transform: translateY(-1px); }
+        body { font-family: 'Inter', sans-serif; transition: background-color 0.3s, color 0.3s; }
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
         .nav-tab { position: relative; padding-bottom: 8px; font-weight: 600; color: #94a3b8; transition: all 0.2s; }
         .nav-tab.active { color: #2563eb; }
+        .dark .nav-tab.active { color: #60a5fa; }
         .nav-tab.active::after { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 3px; background: #2563eb; border-radius: 10px; }
+        .dark .nav-tab.active::after { background: #60a5fa; }
+        .date-btn { transition: all 0.2s; min-width: 90px; }
+        .date-active { background-color: #2563eb; color: white; box-shadow: 0 8px 12px -3px rgba(37, 99, 235, 0.3); transform: translateY(-1px); border-color: transparent !important; }
+        .has-wah { border: 2px solid #f59e0b !important; color: #d97706; }
+        .dark .has-wah { border-color: #fbbf24 !important; color: #fbbf24; }
         .announcement-item { border-left: 3px solid #3b82f6; padding-left: 12px; margin-bottom: 12px; }
+        .card { transition: background-color 0.3s, box-shadow 0.3s; }
     </style>
 </head>
-<body class="pb-24">
+<body class="pb-24 bg-slate-50 text-slate-900 dark:bg-dark-bg dark:text-dark-text">
     <div id="app" class="max-w-md mx-auto px-5 pt-8">
         <!-- Header -->
         <header class="flex justify-between items-start mb-6">
             <div>
-                <h1 class="text-3xl font-extrabold text-slate-900 tracking-tight">Notice Board</h1>
-                <p class="text-slate-500 font-medium mt-1">Transition Program</p>
+                <h1 class="text-3xl font-extrabold tracking-tight">Notice Board</h1>
+                <p class="text-slate-500 dark:text-dark-muted font-medium mt-1">Transition Program</p>
             </div>
             <div class="flex gap-2">
-                <button onclick="jumpToToday()" class="flex items-center gap-1.5 px-3 py-2 bg-blue-50 text-blue-600 rounded-xl text-xs font-bold hover:bg-blue-100 transition-colors">
-                    <i data-lucide="calendar-days" class="w-4 h-4"></i> TODAY
+                <button onclick="toggleDarkMode()" class="p-2.5 bg-white dark:bg-dark-card rounded-xl shadow-sm border border-slate-100 dark:border-slate-800 text-slate-400 hover:text-blue-600 transition-colors">
+                    <i data-lucide="moon" class="w-4 h-4 dark:hidden"></i>
+                    <i data-lucide="sun" class="w-4 h-4 hidden dark:block"></i>
                 </button>
-                <button onclick="fetchData()" class="p-2.5 bg-white rounded-xl shadow-sm border border-slate-100 text-slate-400 hover:text-blue-600 transition-colors">
+                <button onclick="fetchData()" class="p-2.5 bg-white dark:bg-dark-card rounded-xl shadow-sm border border-slate-100 dark:border-slate-800 text-slate-400 hover:text-blue-600 transition-colors">
                     <i data-lucide="refresh-cw" class="w-4 h-4" id="refresh-icon"></i>
                 </button>
             </div>
         </header>
 
         <!-- Main Navigation Tabs -->
-        <nav class="flex gap-8 mb-8 border-b border-slate-100 px-1">
+        <nav class="flex gap-8 mb-8 border-b border-slate-100 dark:border-slate-800 px-1">
             <button onclick="switchTab('dashboard')" id="tab-dashboard" class="nav-tab active">Dashboard</button>
             <button onclick="switchTab('contacts')" id="tab-contacts" class="nav-tab">Contacts</button>
             <button onclick="switchTab('notices')" id="tab-notices" class="nav-tab">Notices</button>
@@ -59,32 +81,39 @@
                 <!-- Date Navigation -->
                 <div class="mb-6">
                     <div class="flex items-center justify-between mb-3 px-1">
-                        <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Select Date</span>
-                        <span id="last-updated" class="text-[9px] text-slate-300 font-bold">---</span>
+                        <span class="text-[10px] font-bold text-slate-400 dark:text-dark-muted uppercase tracking-widest">Timeline</span>
+                        <div class="flex items-center gap-3">
+                            <span id="last-updated" class="text-[9px] text-slate-300 dark:text-slate-600 font-bold">---</span>
+                            <button onclick="jumpToToday()" class="text-[10px] font-bold text-blue-600 dark:text-blue-400 uppercase">Today</button>
+                        </div>
                     </div>
                     <div class="overflow-x-auto whitespace-nowrap py-2 no-scrollbar flex gap-2" id="date-nav"></div>
+                    <div class="flex gap-4 mt-2 px-1">
+                        <div class="flex items-center gap-1.5"><div class="w-2 h-2 rounded-full bg-blue-600"></div><span class="text-[9px] font-bold text-slate-400 uppercase">Selected</span></div>
+                        <div class="flex items-center gap-1.5"><div class="w-2 h-2 rounded border border-amber-500"></div><span class="text-[9px] font-bold text-slate-400 uppercase">Has WAH</span></div>
+                    </div>
                 </div>
 
                 <!-- Date Header -->
                 <div class="flex items-center gap-3 mb-2 px-1">
                     <div class="h-6 w-1 bg-blue-600 rounded-full"></div>
-                    <h2 id="display-date" class="text-lg font-bold text-slate-800">---</h2>
+                    <h2 id="display-date" class="text-lg font-bold">---</h2>
                 </div>
 
                 <!-- WAH Card -->
-                <section class="card p-5 border-t-4 border-amber-400">
+                <section class="card bg-white dark:bg-dark-card p-5 rounded-2xl shadow-sm border-t-4 border-amber-400">
                     <div class="flex items-center gap-2 mb-4">
                         <i data-lucide="home" class="w-4 h-4 text-amber-500"></i>
-                        <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">Work at Home</span>
+                        <span class="text-xs font-bold text-slate-500 dark:text-dark-muted uppercase tracking-wider">Work at Home</span>
                     </div>
-                    <div id="wah-content" class="text-sm text-slate-600 space-y-3"></div>
+                    <div id="wah-content" class="text-sm space-y-3"></div>
                 </section>
 
                 <!-- Lessons Card -->
-                <section class="card p-5 border-t-4 border-emerald-400">
+                <section class="card bg-white dark:bg-dark-card p-5 rounded-2xl shadow-sm border-t-4 border-emerald-400">
                     <div class="flex items-center gap-2 mb-4">
                         <i data-lucide="book-open" class="w-4 h-4 text-emerald-500"></i>
-                        <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">Today's Lessons</span>
+                        <span class="text-xs font-bold text-slate-500 dark:text-dark-muted uppercase tracking-wider">Today's Lessons</span>
                     </div>
                     <div id="lessons-content" class="space-y-5"></div>
                 </section>
@@ -92,28 +121,19 @@
 
             <!-- CONTACTS TAB -->
             <div id="view-contacts" class="hidden space-y-4">
-                <h2 class="text-xl font-bold text-slate-800 mb-4 px-1">Teacher Contacts</h2>
-                <div id="contacts-list" class="space-y-4">
-                    <!-- Contacts will be injected here -->
-                </div>
-                <div class="p-4 bg-blue-50 rounded-2xl border border-blue-100 mt-6">
-                    <p class="text-xs text-blue-700 leading-relaxed">
-                        <strong>Note:</strong> To inform about absenteeism / early dispersal, please email the homerooms directly.
-                    </p>
-                </div>
+                <h2 class="text-xl font-bold mb-4 px-1">Teacher Contacts</h2>
+                <div id="contacts-list" class="space-y-4"></div>
             </div>
 
             <!-- NOTICES TAB -->
             <div id="view-notices" class="hidden space-y-4">
-                <h2 class="text-xl font-bold text-slate-800 mb-4 px-1">General Notices</h2>
-                <div id="notices-list" class="card p-6 bg-slate-50 border border-slate-100">
-                    <!-- Notices injected here -->
-                </div>
+                <h2 class="text-xl font-bold mb-4 px-1">General Notices</h2>
+                <div id="notices-list" class="card bg-white dark:bg-dark-card p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800"></div>
             </div>
         </main>
 
         <footer class="mt-12 text-center">
-            <a href="https://docs.google.com/spreadsheets/d/1u25ZzFmpIy51tpL6xwfGQ7ndZI6n1RsliWgXlDgvRfI/edit" target="_blank" class="text-[10px] text-slate-300 font-bold uppercase tracking-widest hover:text-blue-400 transition-colors">Source Spreadsheet</a>
+            <a href="https://docs.google.com/spreadsheets/d/1u25ZzFmpIy51tpL6xwfGQ7ndZI6n1RsliWgXlDgvRfI/edit" target="_blank" class="text-[10px] text-slate-300 dark:text-slate-700 font-bold uppercase tracking-widest hover:text-blue-400 transition-colors">Source Spreadsheet</a>
         </footer>
     </div>
 
@@ -127,6 +147,15 @@
         let contactData = [];
         let selectedDateStr = "";
         let currentTab = 'dashboard';
+
+        function toggleDarkMode() {
+            document.documentElement.classList.toggle('dark');
+            localStorage.setItem('darkMode', document.documentElement.classList.contains('dark'));
+        }
+
+        if (localStorage.getItem('darkMode') === 'true' || (!localStorage.getItem('darkMode') && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark');
+        }
 
         async function fetchData() {
             const icon = document.getElementById('refresh-icon');
@@ -144,7 +173,7 @@
                 parseDailyData(dailyRes);
                 parseNoticeAndContactData(noticeRes);
                 
-                document.getElementById('last-updated').innerText = 'UPDATED ' + new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                document.getElementById('last-updated').innerText = 'SYNCED ' + new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
                 renderApp();
             } catch (error) {
                 console.error("Fetch error:", error);
@@ -180,10 +209,35 @@
                     });
                 }
             }
-            dailyData = processed;
+
+            // Group by date and sort chronologically
+            const grouped = {};
+            processed.forEach(item => {
+                if (!grouped[item.date]) grouped[item.date] = [];
+                grouped[item.date].push(item);
+            });
+
+            // Convert date strings to Date objects for sorting
+            // Format in sheet: "Mon, 22 Jun" -> we assume 2026 based on title
+            const parseDate = (str) => {
+                const parts = str.split(',')[1].trim().split(' ');
+                const day = parseInt(parts[0]);
+                const monthNames = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+                const month = monthNames.indexOf(parts[1]);
+                return new Date(2026, month, day);
+            };
+
+            const sortedDates = Object.keys(grouped).sort((a, b) => parseDate(a) - parseDate(b));
             
-            if (!selectedDateStr && dailyData.length > 0) {
-                selectedDateStr = dailyData[0].date;
+            dailyData = sortedDates.map(date => ({
+                date: date,
+                timestamp: parseDate(date),
+                entries: grouped[date],
+                hasWAH: grouped[date].some(e => e.component.toLowerCase().includes('wah') && (e.morningCircle || e.english || e.art || e.other))
+            }));
+
+            if (!selectedDateStr) {
+                jumpToToday(false);
             }
         }
 
@@ -196,15 +250,11 @@
             results.forEach(row => {
                 const text = row.filter(c => c && c.trim()).join(" ").trim();
                 if (!text) return;
-
-                // Check for contact section start (usually names and emails)
-                if (text.toLowerCase().includes("email addresses") || text.toLowerCase().includes("names") && text.toLowerCase().includes("subjects")) {
+                if (text.toLowerCase().includes("email addresses") || (text.toLowerCase().includes("names") && text.toLowerCase().includes("subjects"))) {
                     isContactSection = true;
                     return;
                 }
-
                 if (isContactSection) {
-                    // Try to parse contact rows: Name, Subject, Email
                     if (row.length >= 3 && row[2].includes("@")) {
                         contacts.push({ name: row[0], subject: row[1], email: row[2] });
                     }
@@ -227,26 +277,33 @@
             renderApp();
         }
 
-        function jumpToToday() {
-            // Find today's date in the data
-            // Since sheet dates are like "Mon, 22 Jun", we'll try a fuzzy match
+        function jumpToToday(shouldRender = true) {
             const now = new Date();
-            const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-            const todayStr = `${now.getDate()} ${months[now.getMonth()]}`;
+            now.setHours(0,0,0,0);
             
-            const found = dailyData.find(d => d.date.includes(todayStr));
-            if (found) {
-                selectedDateStr = found.date;
-                switchTab('dashboard');
-            } else if (dailyData.length > 0) {
-                selectedDateStr = dailyData[0].date; // Fallback to first
-                switchTab('dashboard');
+            // Find the closest date to today (past or future)
+            let closest = dailyData[0];
+            let minDiff = Infinity;
+            
+            dailyData.forEach(d => {
+                const diff = Math.abs(d.timestamp - now);
+                if (diff < minDiff) {
+                    minDiff = diff;
+                    closest = d;
+                }
+            });
+
+            if (closest) {
+                selectedDateStr = closest.date;
+                if (shouldRender) {
+                    switchTab('dashboard');
+                    renderApp();
+                }
             }
         }
 
         function renderApp() {
             document.getElementById('loading').classList.add('hidden');
-            
             if (currentTab === 'dashboard') {
                 renderDateNav();
                 updateDashboardDisplay();
@@ -255,50 +312,49 @@
             } else if (currentTab === 'notices') {
                 renderNotices();
             }
-            
             lucide.createIcons();
         }
 
         function renderDateNav() {
             const nav = document.getElementById('date-nav');
             nav.innerHTML = "";
-            const uniqueDates = [...new Set(dailyData.map(d => d.date))];
             
-            uniqueDates.forEach(dateStr => {
+            dailyData.forEach(day => {
                 const btn = document.createElement('button');
-                const isActive = dateStr === selectedDateStr;
-                btn.className = `date-btn px-4 py-2 rounded-xl text-xs font-bold border transition-all flex-shrink-0 ${isActive ? 'date-active border-blue-600' : 'bg-white text-slate-400 border-slate-100'}`;
-                btn.innerText = dateStr;
+                const isActive = day.date === selectedDateStr;
+                btn.className = `date-btn px-4 py-2 rounded-xl text-xs font-bold border transition-all flex-shrink-0 ${isActive ? 'date-active' : 'bg-white dark:bg-dark-card text-slate-400 dark:text-dark-muted border-slate-100 dark:border-slate-800'} ${day.hasWAH && !isActive ? 'has-wah' : ''}`;
+                btn.innerText = day.date;
                 btn.onclick = () => {
-                    selectedDateStr = dateStr;
+                    selectedDateStr = day.date;
                     renderDateNav();
                     updateDashboardDisplay();
                 };
                 nav.appendChild(btn);
             });
             
-            // Auto scroll to active button
             const activeBtn = nav.querySelector('.date-active');
             if (activeBtn) activeBtn.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
         }
 
         function updateDashboardDisplay() {
             document.getElementById('display-date').innerText = selectedDateStr;
-            const dayEntries = dailyData.filter(d => d.date === selectedDateStr);
-            const wah = dayEntries.find(d => d.component.toLowerCase().includes('wah'));
-            const lesson = dayEntries.find(d => d.component.toLowerCase().includes('lesson'));
+            const day = dailyData.find(d => d.date === selectedDateStr);
+            if (!day) return;
+
+            const wah = day.entries.find(e => e.component.toLowerCase().includes('wah'));
+            const lesson = day.entries.find(e => e.component.toLowerCase().includes('lesson'));
 
             // WAH
             const wahContainer = document.getElementById('wah-content');
-            if (wah) {
+            if (wah && (wah.morningCircle || wah.english || wah.art || wah.other)) {
                 let html = "";
                 const fields = [{l:'Circle', v:wah.morningCircle}, {l:'English', v:wah.english}, {l:'Art', v:wah.art}, {l:'Details', v:wah.other}];
                 fields.forEach(f => {
-                    if (f.v && f.v.trim()) html += `<div><span class="text-[9px] font-black text-amber-500 uppercase block">${f.l}</span><p class="text-amber-900/80 font-medium">${f.v}</p></div>`;
+                    if (f.v && f.v.trim()) html += `<div><span class="text-[9px] font-black text-amber-500 uppercase block">${f.l}</span><p class="text-slate-600 dark:text-slate-300 font-medium">${f.v}</p></div>`;
                 });
-                wahContainer.innerHTML = html || "<p class='text-slate-400 italic'>No specific tasks.</p>";
+                wahContainer.innerHTML = html;
             } else {
-                wahContainer.innerHTML = "<p class='text-slate-400 italic'>No WAH listed.</p>";
+                wahContainer.innerHTML = "<p class='text-slate-400 dark:text-dark-muted italic'>No specific tasks for this date.</p>";
             }
 
             // Lessons
@@ -309,41 +365,28 @@
                 fields.forEach(f => {
                     if (f.v && f.v.trim()) {
                         const div = document.createElement('div');
-                        div.innerHTML = `<div class="flex items-center gap-2 mb-1"><div class="w-1 h-1 rounded-full bg-emerald-400"></div><span class="text-[9px] font-bold text-slate-400 uppercase tracking-tighter">${f.l}</span></div><p class="text-slate-700 text-sm leading-relaxed pl-3 border-l border-slate-100">${f.v}</p>`;
+                        div.innerHTML = `<div class="flex items-center gap-2 mb-1"><div class="w-1 h-1 rounded-full bg-emerald-400"></div><span class="text-[9px] font-bold text-slate-400 dark:text-dark-muted uppercase tracking-tighter">${f.l}</span></div><p class="text-slate-700 dark:text-slate-300 text-sm leading-relaxed pl-3 border-l border-slate-100 dark:border-slate-800">${f.v}</p>`;
                         lessonContainer.appendChild(div);
                     }
                 });
             } else {
-                lessonContainer.innerHTML = "<p class='text-slate-400 italic'>No lesson details.</p>";
+                lessonContainer.innerHTML = "<p class='text-slate-400 dark:text-dark-muted italic'>No lesson details available.</p>";
             }
         }
 
         function renderContacts() {
             const list = document.getElementById('contacts-list');
-            if (contactData.length === 0) {
-                list.innerHTML = "<p class='text-slate-400 italic p-4'>Contact list is empty in the sheet.</p>";
-                return;
-            }
-            list.innerHTML = contactData.map(c => `
-                <div class="card p-4 flex items-center justify-between">
-                    <div>
-                        <h3 class="font-bold text-slate-800">${c.name}</h3>
-                        <p class="text-xs text-slate-500 font-medium">${c.subject}</p>
-                    </div>
-                    <a href="mailto:${c.email}" class="p-2 bg-blue-50 text-blue-600 rounded-lg">
-                        <i data-lucide="mail" class="w-4 h-4"></i>
-                    </a>
+            list.innerHTML = contactData.length === 0 ? "<p class='text-slate-400 italic p-4'>Contact list is empty.</p>" : contactData.map(c => `
+                <div class="card bg-white dark:bg-dark-card p-4 rounded-2xl shadow-sm flex items-center justify-between border border-slate-50 dark:border-slate-800">
+                    <div><h3 class="font-bold">${c.name}</h3><p class="text-xs text-slate-500 dark:text-dark-muted font-medium">${c.subject}</p></div>
+                    <a href="mailto:${c.email}" class="p-2 bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-lg"><i data-lucide="mail" class="w-4 h-4"></i></a>
                 </div>
             `).join('');
         }
 
         function renderNotices() {
             const list = document.getElementById('notices-list');
-            if (noticeData.length === 0) {
-                list.innerHTML = "<p class='text-slate-400 italic'>No active notices.</p>";
-                return;
-            }
-            list.innerHTML = noticeData.map(n => `<div class="announcement-item"><p class="text-sm text-slate-600 leading-relaxed">${n}</p></div>`).join('');
+            list.innerHTML = noticeData.length === 0 ? "<p class='text-slate-400 italic'>No active notices.</p>" : noticeData.map(n => `<div class="announcement-item"><p class="text-sm text-slate-600 dark:text-slate-300 leading-relaxed">${n}</p></div>`).join('');
         }
 
         fetchData();
