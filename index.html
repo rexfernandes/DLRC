@@ -1,1064 +1,289 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Transition Class · DLRC</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-    :root {
-      --bg:        #EEF1EE;
-      --surface:   #FFFFFF;
-      --header:    #0D2B22;
-      --ink:       #0D2B22;
-      --ink-2:     #3D5A50;
-      --ink-3:     #8AA49A;
-      --green:     #22C55E;
-      --amber:     #F59E0B;
-      --amber-light: #FFFBEB;
-      --amber-mid:   #FEF3C7;
-      --radius:    16px;
-      --radius-sm: 10px;
-      --shadow:    0 1px 3px rgba(13,43,34,.07), 0 6px 18px rgba(13,43,34,.06);
-
-      /* Subject palette */
-      --s-homerooms: #7C3AED; --s-homerooms-bg: #F5F3FF;
-      --s-english:   #1D4ED8; --s-english-bg:   #EFF6FF;
-      --s-numeracy:  #059669; --s-numeracy-bg:  #ECFDF5;
-      --s-evlf:      #0891B2; --s-evlf-bg:      #ECFEFF;
-      --s-art:       #DB2777; --s-art-bg:       #FDF2F8;
-      --s-sports:    #D97706; --s-sports-bg:    #FFFBEB;
-      --s-skills:    #9333EA; --s-skills-bg:    #FAF5FF;
-      --s-thematics: #4F46E5; --s-thematics-bg: #EEF2FF;
-      --s-music:     #DC2626; --s-music-bg:     #FEF2F2;
-      --s-default:   #475569; --s-default-bg:   #F8FAFC;
-    }
-
-    body {
-      font-family: 'Plus Jakarta Sans', sans-serif;
-      background: var(--bg);
-      color: var(--ink);
-      min-height: 100vh;
-      -webkit-font-smoothing: antialiased;
-    }
-
-    /* ── HEADER ─────────────────────────────────────── */
-    .hdr {
-      background: var(--header);
-      color: #fff;
-      padding: 20px 20px 22px;
-    }
-    .hdr-inner {
-      max-width: 1080px;
-      margin: 0 auto;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 16px;
-    }
-    .hdr-left { flex: 1; min-width: 0; }
-    .hdr-eyebrow {
-      font-size: 10px;
-      font-weight: 700;
-      letter-spacing: .14em;
-      text-transform: uppercase;
-      color: #5A9B84;
-      margin-bottom: 3px;
-    }
-    .hdr-title {
-      font-size: clamp(18px, 4vw, 26px);
-      font-weight: 800;
-      color: #fff;
-    }
-    .hdr-status {
-      display: flex;
-      align-items: center;
-      gap: 7px;
-      margin-top: 8px;
-    }
-    .live-dot {
-      width: 6px; height: 6px;
-      background: var(--green);
-      border-radius: 50%;
-      flex-shrink: 0;
-      animation: blink 2.5s ease-in-out infinite;
-    }
-    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:.25} }
-    .status-text { font-size: 11.5px; color: #6BAF96; }
-    .refresh-btn {
-      margin-top: 10px;
-      display: inline-flex;
-      align-items: center;
-      gap: 5px;
-      background: rgba(255,255,255,.08);
-      border: 1px solid rgba(255,255,255,.12);
-      color: #7ABFAA;
-      border-radius: 20px;
-      padding: 4px 13px;
-      font-size: 11.5px;
-      font-family: inherit;
-      font-weight: 600;
-      cursor: pointer;
-      transition: background .15s, color .15s;
-    }
-    .refresh-btn:hover { background: rgba(255,255,255,.15); color: #fff; }
-
-    .hdr-date {
-      flex-shrink: 0;
-      text-align: right;
-    }
-    .hdr-day {
-      font-size: clamp(40px, 8vw, 56px);
-      font-weight: 800;
-      line-height: 1;
-      color: #fff;
-    }
-    .hdr-month {
-      font-size: 11px;
-      font-weight: 600;
-      color: #5A9B84;
-      letter-spacing: .1em;
-      text-transform: uppercase;
-      margin-top: 2px;
-    }
-    .hdr-weekday {
-      font-size: 11px;
-      color: #5A9B84;
-      margin-top: 1px;
-    }
-
-    /* ── MAIN LAYOUT ─────────────────────────────────── */
-    .main {
-      max-width: 1080px;
-      margin: 0 auto;
-      padding: 20px 16px 60px;
-    }
-    .stack { display: flex; flex-direction: column; gap: 18px; }
-
-    /* ── NOTICE BANNER ───────────────────────────────── */
-    .notice {
-      background: var(--amber-light);
-      border: 1.5px solid #FCD34D;
-      border-radius: var(--radius-sm);
-      padding: 12px 16px;
-      display: none;
-      align-items: flex-start;
-      gap: 10px;
-    }
-    .notice.show { display: flex; }
-    .notice-icon { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
-    .notice-text { font-size: 13.5px; font-weight: 600; color: #78350F; line-height: 1.5; }
-
-    /* ── SECTION HEADER ──────────────────────────────── */
-    .sec-hd {
-      display: flex;
-      align-items: baseline;
-      justify-content: space-between;
-      gap: 8px;
-      margin-bottom: 10px;
-    }
-    .sec-hd h2 {
-      font-size: 14px;
-      font-weight: 700;
-      color: var(--ink);
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-    .sec-badge {
-      font-size: 11px;
-      font-weight: 600;
-      color: var(--ink-3);
-      background: rgba(13,43,34,.06);
-      border-radius: 20px;
-      padding: 2px 9px;
-    }
-    .sec-date {
-      font-size: 11.5px;
-      color: var(--ink-3);
-      font-weight: 500;
-    }
-
-    /* ── LESSON TABLE WRAPPER ────────────────────────── */
-    .table-wrap {
-      background: var(--surface);
-      border-radius: var(--radius);
-      box-shadow: var(--shadow);
-      overflow: hidden;
-    }
-    .table-scroll { overflow-x: auto; }
-    .scroll-hint {
-      display: none;
-      font-size: 11px;
-      color: var(--ink-3);
-      text-align: right;
-      padding: 6px 14px 0;
-    }
-    @media (max-width: 680px) { .scroll-hint { display: block; } }
-
-    /* ── LESSON TABLE ────────────────────────────────── */
-    .lesson-table {
-      width: 100%;
-      border-collapse: collapse;
-      min-width: 560px;
-    }
-    .lesson-table thead tr {
-      background: #0D2B22;
-    }
-    .lesson-table thead th {
-      color: #5A9B84;
-      font-size: 10px;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: .12em;
-      padding: 11px 16px;
-      text-align: left;
-      white-space: nowrap;
-    }
-    .lesson-table thead th.th-subject { width: 150px; }
-    .lesson-table thead th.th-wah {
-      background: #1A3D2E;
-      color: #E8A44A;
-      width: 220px;
-    }
-
-    .lesson-table tbody tr {
-      border-bottom: 1px solid var(--bg);
-      transition: background .12s;
-    }
-    .lesson-table tbody tr:last-child { border-bottom: none; }
-    .lesson-table tbody tr:hover { background: #F5F7F5; }
-
-    /* WAH cells always get tint on hover */
-    .lesson-table tbody tr:hover .td-wah { background: #FEF0C7; }
-
-    .lesson-table td {
-      padding: 13px 16px;
-      font-size: 13.5px;
-      color: var(--ink);
-      vertical-align: top;
-      line-height: 1.55;
-    }
-
-    /* Subject column */
-    .td-subject {
-      font-weight: 600;
-      white-space: nowrap;
-      border-left: 4px solid transparent;
-    }
-    .subject-cell {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-    .s-emoji { font-size: 16px; flex-shrink: 0; }
-    .s-name  { font-size: 13px; font-weight: 700; }
-
-    /* Content columns */
-    .td-content { color: var(--ink-2); }
-
-    /* WAH column */
-    .td-wah {
-      background: var(--amber-mid);
-      color: var(--ink);
-      font-size: 13px;
-      border-left: 1px solid #FDE68A;
-    }
-    .wah-text-cell {
-      font-weight: 500;
-      color: #78350F;
-      line-height: 1.5;
-      white-space: pre-line;
-    }
-    .no-wah { color: #C4B5A0; font-size: 12px; }
-
-    /* Per-subject row colouring */
-    .row-homerooms .td-subject { border-left-color: var(--s-homerooms); }
-    .row-english   .td-subject { border-left-color: var(--s-english);   }
-    .row-numeracy  .td-subject { border-left-color: var(--s-numeracy);  }
-    .row-evlf      .td-subject { border-left-color: var(--s-evlf);      }
-    .row-art       .td-subject { border-left-color: var(--s-art);       }
-    .row-sports    .td-subject { border-left-color: var(--s-sports);    }
-    .row-skills    .td-subject { border-left-color: var(--s-skills);    }
-    .row-thematics .td-subject { border-left-color: var(--s-thematics); }
-    .row-music     .td-subject { border-left-color: var(--s-music);     }
-    .row-default   .td-subject { border-left-color: var(--s-default);   }
-
-    /* ── WAH SUMMARY PANEL ───────────────────────────── */
-    .wah-panel {
-      background: var(--surface);
-      border-radius: var(--radius);
-      box-shadow: var(--shadow);
-      overflow: hidden;
-    }
-    .wah-panel-header {
-      background: #78350F;
-      padding: 12px 16px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
-    .wah-panel-title {
-      font-size: 13px;
-      font-weight: 700;
-      color: #FEF3C7;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-    .wah-count-badge {
-      font-size: 11px;
-      font-weight: 700;
-      color: #78350F;
-      background: #FDE68A;
-      border-radius: 20px;
-      padding: 2px 9px;
-    }
-    .wah-item {
-      display: flex;
-      align-items: flex-start;
-      gap: 10px;
-      padding: 12px 16px;
-      border-bottom: 1px solid var(--bg);
-    }
-    .wah-item:last-child { border-bottom: none; }
-    .wah-item-emoji { font-size: 15px; flex-shrink: 0; margin-top: 1px; }
-    .wah-item-content {}
-    .wah-item-subject {
-      font-size: 10px;
-      font-weight: 700;
-      letter-spacing: .1em;
-      text-transform: uppercase;
-      color: var(--ink-3);
-      margin-bottom: 2px;
-    }
-    .wah-item-text {
-      font-size: 13.5px;
-      color: var(--ink);
-      font-weight: 500;
-      line-height: 1.5;
-      white-space: pre-line;
-    }
-    .wah-empty {
-      padding: 22px 16px;
-      text-align: center;
-      color: var(--ink-3);
-      font-size: 13px;
-    }
-    .wah-empty-emoji { font-size: 26px; display: block; margin-bottom: 6px; }
-
-    /* ── GRID (lessons + wah side by side on desktop) ── */
-    .lesson-wah-grid {
-      display: grid;
-      grid-template-columns: 1fr;
-      gap: 18px;
-    }
-    @media (min-width: 820px) {
-      .lesson-wah-grid {
-        grid-template-columns: 1fr 280px;
-        align-items: start;
-      }
-    }
-
-    /* ── ANNOUNCEMENTS ───────────────────────────────── */
-    .ann-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-      gap: 10px;
-    }
-    .ann-card {
-      background: var(--surface);
-      border-radius: var(--radius-sm);
-      box-shadow: 0 1px 4px rgba(13,43,34,.06);
-      border: 1px solid rgba(13,43,34,.07);
-      padding: 13px 15px;
-    }
-    .ann-date {
-      font-size: 10.5px;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: .08em;
-      color: var(--ink-3);
-      margin-bottom: 5px;
-    }
-    .ann-text {
-      font-size: 13.5px;
-      color: var(--ink);
-      line-height: 1.55;
-      white-space: pre-line;
-    }
-
-    /* ── LOWER GRID ──────────────────────────────────── */
-    .lower-grid {
-      display: grid;
-      grid-template-columns: 1fr;
-      gap: 12px;
-    }
-    @media (min-width: 600px) {
-      .lower-grid { grid-template-columns: 1fr 1fr; }
-    }
-
-    /* ── COLLAPSE CARD ───────────────────────────────── */
-    .col-card {
-      background: var(--surface);
-      border-radius: var(--radius);
-      box-shadow: var(--shadow);
-      overflow: hidden;
-    }
-    .col-trigger {
-      width: 100%;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 13px 18px;
-      background: none;
-      border: none;
-      cursor: pointer;
-      font-family: inherit;
-      text-align: left;
-    }
-    .col-trigger h3 {
-      font-size: 13.5px;
-      font-weight: 700;
-      color: var(--ink);
-      display: flex;
-      align-items: center;
-      gap: 7px;
-    }
-    .col-arrow {
-      font-size: 11px;
-      color: var(--ink-3);
-      transition: transform .18s;
-    }
-    .col-arrow.open { transform: rotate(180deg); }
-    .col-body { display: none; padding: 0 18px 14px; }
-    .col-body.open { display: block; }
-
-    /* ── CONTACTS ────────────────────────────────────── */
-    .contact-row {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 10px;
-      padding: 8px 0;
-      border-bottom: 1px solid var(--bg);
-    }
-    .contact-row:last-child { border-bottom: none; }
-    .contact-subject { font-size: 13px; font-weight: 600; color: var(--ink); }
-    .contact-name    { font-size: 11.5px; color: var(--ink-3); margin-top: 1px; }
-    .contact-email   {
-      font-size: 11px;
-      font-weight: 600;
-      color: #1D4ED8;
-      text-decoration: none;
-      flex-shrink: 0;
-      padding: 3px 10px;
-      border: 1px solid #BFDBFE;
-      border-radius: 20px;
-      transition: background .12s;
-    }
-    .contact-email:hover { background: #EFF6FF; }
-
-    /* ── NORMS ───────────────────────────────────────── */
-    .norm-item {
-      display: flex;
-      align-items: flex-start;
-      gap: 8px;
-      padding: 6px 0;
-      font-size: 13px;
-      color: var(--ink);
-      line-height: 1.45;
-      border-bottom: 1px solid var(--bg);
-    }
-    .norm-item:last-child { border-bottom: none; }
-    .norm-check { color: var(--green); font-size: 12px; margin-top: 2px; flex-shrink: 0; }
-
-    /* ── TIMETABLE ───────────────────────────────────── */
-    .tt-wrap { overflow-x: auto; }
-    .tt-table { width: 100%; border-collapse: collapse; font-size: 12px; min-width: 480px; }
-    .tt-table th {
-      background: var(--bg);
-      font-size: 10px;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: .08em;
-      color: var(--ink-2);
-      padding: 8px 12px;
-      text-align: left;
-      border-bottom: 2px solid rgba(13,43,34,.08);
-    }
-    .tt-table td {
-      padding: 8px 12px;
-      border-bottom: 1px solid var(--bg);
-      color: var(--ink);
-      vertical-align: top;
-    }
-    .tt-table tr:last-child td { border-bottom: none; }
-    .tt-table tr:hover td { background: #F5F7F5; }
-
-    /* ── FOOTER ──────────────────────────────────────── */
-    .footer {
-      max-width: 1080px;
-      margin: 0 auto;
-      padding: 0 16px 32px;
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
-      gap: 14px;
-    }
-    .footer a {
-      font-size: 11.5px;
-      color: var(--ink-3);
-      text-decoration: none;
-      display: flex;
-      align-items: center;
-      gap: 4px;
-    }
-    .footer a:hover { color: var(--ink); }
-
-    /* ── LOADING / EMPTY STATES ──────────────────────── */
-    .loading {
-      padding: 24px;
-      text-align: center;
-      color: var(--ink-3);
-      font-size: 13px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-    }
-    .spinner {
-      width: 16px; height: 16px;
-      border: 2px solid var(--bg);
-      border-top-color: var(--green);
-      border-radius: 50%;
-      animation: spin .7s linear infinite;
-      flex-shrink: 0;
-    }
-    @keyframes spin { to { transform: rotate(360deg); } }
-    .empty {
-      padding: 28px;
-      text-align: center;
-      color: var(--ink-3);
-      font-size: 13px;
-      line-height: 1.6;
-    }
-    .empty-icon { font-size: 28px; display: block; margin-bottom: 8px; }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>School Notice Board</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; background-color: #f8fafc; color: #1e293b; }
+        .card { background: white; border-radius: 16px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); }
+        .date-btn { transition: all 0.2s; min-width: 100px; }
+        .date-active { background-color: #2563eb; color: white; box-shadow: 0 10px 15px -3px rgba(37, 99, 235, 0.4); transform: translateY(-2px); }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        .section-title { font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: #64748b; margin-bottom: 0.75rem; display: flex; items-center: center; gap: 0.5rem; }
+        .content-text { font-size: 0.9375rem; line-height: 1.6; color: #334155; }
+        .highlight-box { background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%); border: 1px solid #bfdbfe; }
+    </style>
 </head>
-<body>
-
-  <!-- ── HEADER ──────────────────────────────────────── -->
-  <header class="hdr">
-    <div class="hdr-inner">
-      <div class="hdr-left">
-        <div class="hdr-eyebrow">DLRC · Transition Programme 2026–27</div>
-        <div class="hdr-title">Parent Dashboard</div>
-        <div class="hdr-status">
-          <span class="live-dot"></span>
-          <span class="status-text" id="status-text">Connecting…</span>
-        </div>
-        <button class="refresh-btn" onclick="loadAll()">
-          <span id="refresh-icon">↻</span> Refresh
-        </button>
-      </div>
-      <div class="hdr-date">
-        <div class="hdr-day"  id="hdr-day">--</div>
-        <div class="hdr-month" id="hdr-month">---</div>
-        <div class="hdr-weekday" id="hdr-weekday"></div>
-      </div>
-    </div>
-  </header>
-
-  <!-- ── MAIN ────────────────────────────────────────── -->
-  <div class="main">
-    <div class="stack">
-
-      <!-- Notice Banner -->
-      <div class="notice" id="notice-banner">
-        <span class="notice-icon">📢</span>
-        <p class="notice-text" id="notice-text"></p>
-      </div>
-
-      <!-- Lesson Table + WAH Panel -->
-      <div class="lesson-wah-grid">
-
-        <!-- Lesson Table -->
-        <div>
-          <div class="sec-hd">
-            <h2>📖 Today's Lesson Plan</h2>
-            <span class="sec-date" id="lesson-date"></span>
-          </div>
-          <div class="table-wrap">
-            <div class="scroll-hint">← scroll to see all →</div>
-            <div class="table-scroll" id="lesson-table-area">
-              <div class="loading"><span class="spinner"></span>Loading lesson plan…</div>
-            </div>
-          </div>
-        </div>
-
-        <!-- WAH Panel -->
-        <div>
-          <div class="sec-hd">
-            <h2>📝 Work at Home</h2>
-            <span class="wah-count-badge" id="wah-badge" style="display:none"></span>
-          </div>
-          <div class="wah-panel">
-            <div id="wah-list">
-              <div class="loading"><span class="spinner"></span>Loading…</div>
-            </div>
-          </div>
-        </div>
-
-      </div>
-
-      <!-- Announcements -->
-      <div>
-        <div class="sec-hd">
-          <h2>📣 Announcements</h2>
-        </div>
-        <div class="ann-grid" id="ann-container">
-          <div class="ann-card"><div class="loading"><span class="spinner"></span>Loading…</div></div>
-        </div>
-      </div>
-
-      <!-- Contacts + Norms -->
-      <div class="lower-grid">
-
-        <div class="col-card">
-          <button class="col-trigger" onclick="colToggle('contacts')">
-            <h3>👩‍🏫 Teacher Contacts</h3>
-            <span class="col-arrow" id="contacts-arrow">▾</span>
-          </button>
-          <div class="col-body" id="contacts-body">
-            <div class="loading" style="padding:10px 0"><span class="spinner"></span>Loading…</div>
-          </div>
-        </div>
-
-        <div class="col-card">
-          <button class="col-trigger" onclick="colToggle('norms')">
-            <h3>📋 Class Norms</h3>
-            <span class="col-arrow" id="norms-arrow">▾</span>
-          </button>
-          <div class="col-body" id="norms-body">
-            <div class="loading" style="padding:10px 0"><span class="spinner"></span>Loading…</div>
-          </div>
-        </div>
-
-      </div>
-
-      <!-- Timetable -->
-      <div class="col-card">
-        <button class="col-trigger" onclick="colToggle('timetable')">
-          <h3>📅 Weekly Timetable</h3>
-          <span class="col-arrow" id="timetable-arrow">▾</span>
-        </button>
-        <div class="col-body" id="timetable-body">
-          <div class="loading" style="padding:10px 0"><span class="spinner"></span>Loading…</div>
-        </div>
-      </div>
-
-    </div>
-  </div>
-
-  <!-- ── FOOTER ───────────────────────────────────────── -->
-  <footer class="footer">
-    <a href="https://docs.google.com/spreadsheets/d/1u25ZzFmpIy51tpL6xwfGQ7ndZI6n1RsliWgXlDgvRfI/edit" target="_blank">📊 Open Sheet</a>
-    <a href="https://script.google.com/macros/s/AKfycbw91Sp7OQ-uGppWdK2a-uGXsYz344ZLt2EUU3q2LNa55TyojKTQH2znVEs-QGQpMUldcw/exec" target="_blank">📆 View Calendar</a>
-    <a href="mailto:dlrc-primary-facilitators@googlegroups.com">✉️ Contact Homeroom</a>
-  </footer>
-
-<script>
-/* ── CONFIG ──────────────────────────────────────────── */
-const SHEET_ID = '1u25ZzFmpIy51tpL6xwfGQ7ndZI6n1RsliWgXlDgvRfI';
-const SHEETS = {
-  notice:        'Notice board',
-  announcements: 'Special Announcements',
-  lessons:       'Daily Lesson plans',
-  timetable:     'Timetable',
-};
-const TODAY = new Date();
-
-/* ── HEADER DATE ─────────────────────────────────────── */
-document.getElementById('hdr-day').textContent     = TODAY.getDate();
-document.getElementById('hdr-month').textContent   = TODAY.toLocaleDateString('en-IN',{ month:'long', year:'numeric' });
-document.getElementById('hdr-weekday').textContent = TODAY.toLocaleDateString('en-IN',{ weekday:'long' });
-
-/* ── SUBJECT META ─────────────────────────────────────── */
-const SUBJECTS = [
-  { match:['homeroom','home room'], key:'homerooms', emoji:'🏠' },
-  { match:['english'],              key:'english',   emoji:'📚' },
-  { match:['numeracy','math'],      key:'numeracy',  emoji:'🔢' },
-  { match:['evlf','environment'],   key:'evlf',      emoji:'🌿' },
-  { match:['art'],                  key:'art',       emoji:'🎨' },
-  { match:['sport'],                key:'sports',    emoji:'⚽' },
-  { match:['skill','handwork'],     key:'skills',    emoji:'✂️' },
-  { match:['thematic'],             key:'thematics', emoji:'🔭' },
-  { match:['music'],                key:'music',     emoji:'🎵' },
-];
-function subjectMeta(name) {
-  const low = (name||'').toLowerCase();
-  const hit = SUBJECTS.find(s => s.match.some(m => low.includes(m)));
-  return hit ? { key: hit.key, emoji: hit.emoji } : { key:'default', emoji:'📌' };
-}
-
-function esc(s) {
-  return String(s??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-}
-function fmtDate(d) {
-  if(!(d instanceof Date)||isNaN(d)) return '';
-  return d.toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'});
-}
-function sameDay(a,b) {
-  return a instanceof Date && b instanceof Date &&
-         a.getFullYear()===b.getFullYear() &&
-         a.getMonth()===b.getMonth() &&
-         a.getDate()===b.getDate();
-}
-
-/* ── COLLAPSE ─────────────────────────────────────────── */
-function colToggle(key) {
-  const body  = document.getElementById(key+'-body');
-  const arrow = document.getElementById(key+'-arrow');
-  const open  = body.classList.toggle('open');
-  arrow.classList.toggle('open', open);
-}
-
-/* ── GVIZ FETCH ──────────────────────────────────────── */
-async function fetchSheet(name) {
-  const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(name)}`;
-  try {
-    const res  = await fetch(url);
-    const text = await res.text();
-    const s = text.indexOf('{'), e = text.lastIndexOf('}');
-    if(s<0||e<0) throw new Error('no JSON');
-    return JSON.parse(text.slice(s,e+1));
-  } catch(err) {
-    console.error('fetchSheet',name,err);
-    return null;
-  }
-}
-
-function parseTable(data) {
-  if(!data?.table) return {cols:[],rows:[]};
-  const cols = data.table.cols.map(c=>(c.label||c.id||'').trim());
-  const rows = (data.table.rows||[]).map(row => {
-    const obj = {};
-    (row.c||[]).forEach((cell,i) => {
-      const k = cols[i]??`_c${i}`;
-      if(!cell||cell.v==null){ obj[k]=''; return; }
-      if(typeof cell.v==='string'&&cell.v.startsWith('Date(')) {
-        const p = cell.v.slice(5,-1).split(',').map(Number);
-        obj[k] = new Date(p[0],p[1],p[2]);
-      } else {
-        obj[k] = cell.f??cell.v??'';
-      }
-    });
-    return obj;
-  });
-  return { cols, rows: rows.filter(r=>Object.values(r).some(v=>v!==''&&v!=null)) };
-}
-
-/* ── NOTICE BOARD ────────────────────────────────────── */
-async function loadNotice() {
-  const data = await fetchSheet(SHEETS.notice);
-  if(!data) return;
-  const {cols,rows} = parseTable(data);
-
-  /* Main announcement */
-  const first = rows[0];
-  if(first) {
-    const raw = String(Object.values(first)[0]||'').trim();
-    const notice = raw.replace(/^class notice board\s*[-–—]?\s*/i,'').trim();
-    if(notice) {
-      document.getElementById('notice-text').textContent = notice;
-      document.getElementById('notice-banner').classList.add('show');
-    }
-  }
-
-  /* Class norms */
-  const normsRow = rows.find(r=>
-    Object.values(r).some(v=>/class norms|napkin|dress code/i.test(String(v)))
-  );
-  if(normsRow) {
-    const raw = String(Object.values(normsRow).find(v=>String(v).length>20)||'');
-    const lines = raw
-      .replace(/class norms[-\s]*/i,'')
-      .split(/\n|\r|(?=\d+\.\s)/)
-      .map(s=>s.replace(/^\d+\.\s*/,'').trim())
-      .filter(s=>s.length>2);
-    document.getElementById('norms-body').innerHTML =
-      lines.map(l=>`<div class="norm-item"><span class="norm-check">✓</span><span>${esc(l)}</span></div>`).join('') ||
-      '<div class="empty" style="padding:10px 0">No norms found.</div>';
-  }
-
-  /* Teacher contacts */
-  const hdrIdx = rows.findIndex(r=>
-    Object.values(r).some(v=>/^names?$/i.test(String(v).trim()))
-  );
-  if(hdrIdx>=0) {
-    const contacts = rows.slice(hdrIdx+1).filter(r=>{
-      const vals = Object.values(r).filter(v=>String(v).trim());
-      return vals.length>=2;
-    });
-    document.getElementById('contacts-body').innerHTML = contacts.length
-      ? contacts.map(r=>{
-          const [names,subject,emails=''] = Object.values(r).map(v=>String(v||'').trim());
-          const email = (emails).split(/\n|,/)[0].trim();
-          return `<div class="contact-row">
+<body class="pb-12">
+    <div id="app" class="max-w-md mx-auto px-5 pt-8">
+        <!-- Header -->
+        <header class="flex justify-between items-start mb-8">
             <div>
-              <div class="contact-subject">${esc(subject||'')}</div>
-              <div class="contact-name">${esc((names||'').replace(/\n/g,', '))}</div>
+                <h1 class="text-3xl font-extrabold text-slate-900 tracking-tight">Notice Board</h1>
+                <p class="text-slate-500 font-medium mt-1">Transition Program 2026-27</p>
             </div>
-            ${email?`<a class="contact-email" href="mailto:${esc(email)}">✉ Email</a>`:''}
-          </div>`;
-        }).join('')
-      : '<div class="empty" style="padding:10px 0">No contacts found.</div>';
-  }
-}
+            <button onclick="fetchData()" class="p-2.5 bg-white rounded-xl shadow-sm border border-slate-100 text-slate-400 hover:text-blue-600 transition-colors">
+                <i data-lucide="refresh-cw" class="w-5 h-5" id="refresh-icon"></i>
+            </button>
+        </header>
 
-/* ── LESSON PLANS ────────────────────────────────────── */
-async function loadLessons() {
-  const tableArea = document.getElementById('lesson-table-area');
-  const wahList   = document.getElementById('wah-list');
-  const wahBadge  = document.getElementById('wah-badge');
+        <!-- Date Navigation -->
+        <div class="mb-8">
+            <div class="flex items-center justify-between mb-3 px-1">
+                <span class="text-sm font-bold text-slate-400">Select Date</span>
+                <span id="last-updated" class="text-[10px] text-slate-400 uppercase font-bold">Live Syncing...</span>
+            </div>
+            <div class="overflow-x-auto whitespace-nowrap py-3 no-scrollbar flex gap-3" id="date-nav">
+                <!-- Date buttons injected here -->
+            </div>
+        </div>
 
-  const data = await fetchSheet(SHEETS.lessons);
-  if(!data) {
-    const errHtml = `<div class="empty">
-      <span class="empty-icon">⚠️</span>
-      Couldn't load lessons. Make sure the sheet is set to<br>
-      <strong>"Anyone with the link can view"</strong>.
-    </div>`;
-    tableArea.innerHTML = errHtml;
-    wahList.innerHTML   = errHtml;
-    return;
-  }
+        <!-- Main Content -->
+        <main id="main-content">
+            <!-- Loading State -->
+            <div id="loading" class="flex flex-col items-center justify-center py-24">
+                <div class="w-12 h-12 border-4 border-blue-100 border-t-blue-600 rounded-full animate-spin mb-4"></div>
+                <p class="text-slate-400 font-medium">Fetching latest updates...</p>
+            </div>
 
-  const {cols, rows} = parseTable(data);
-  if(!rows.length) {
-    tableArea.innerHTML = '<div class="empty"><span class="empty-icon">📭</span>No lesson entries yet.</div>';
-    wahList.innerHTML   = '<div class="wah-empty">Nothing yet.</div>';
-    return;
-  }
+            <!-- Dashboard View -->
+            <div id="dashboard-view" class="hidden space-y-6">
+                
+                <!-- Date Header -->
+                <div class="flex items-center gap-3 mb-2 px-1">
+                    <div class="h-8 w-1.5 bg-blue-600 rounded-full"></div>
+                    <h2 id="display-date" class="text-xl font-bold text-slate-800">---</h2>
+                </div>
 
-  /* Identify key columns */
-  const findCol = (...terms) =>
-    cols.findIndex(c => terms.some(t=>c.toLowerCase().includes(t.toLowerCase())));
+                <!-- WAH Card -->
+                <section id="wah-section" class="card p-6 border-t-4 border-amber-400">
+                    <div class="section-title">
+                        <i data-lucide="home" class="w-4 h-4 text-amber-500"></i>
+                        Work at Home (WAH)
+                    </div>
+                    <div id="wah-content" class="content-text space-y-3">
+                        <p class="text-slate-400 italic">No specific tasks for today.</p>
+                    </div>
+                </section>
 
-  const dateColI    = findCol('date','day');
-  const subjectColI = findCol('subject','class','period');
-  const wahColI     = findCol('wah','homework','work at home','hw');
+                <!-- Lessons Card -->
+                <section id="lessons-section" class="card p-6 border-t-4 border-emerald-400">
+                    <div class="section-title">
+                        <i data-lucide="book-open" class="w-4 h-4 text-emerald-500"></i>
+                        Today's Lessons
+                    </div>
+                    <div id="lessons-content" class="space-y-5">
+                        <!-- Lessons injected here -->
+                    </div>
+                </section>
 
-  /* Filter to today or most recent past date */
-  let targetRows = [];
-  let targetDate = null;
+                <!-- General Notice Card -->
+                <section id="notice-section" class="mt-10">
+                    <div class="section-title px-1">
+                        <i data-lucide="megaphone" class="w-4 h-4 text-blue-500"></i>
+                        General Announcements
+                    </div>
+                    <div id="notice-content" class="card p-6 highlight-box">
+                        <p class="text-slate-400 italic">Loading notices...</p>
+                    </div>
+                </section>
+            </div>
+        </main>
 
-  if(dateColI>=0) {
-    targetRows = rows.filter(r=>sameDay(r[cols[dateColI]], TODAY));
-    if(!targetRows.length) {
-      const past = rows
-        .filter(r=>r[cols[dateColI]] instanceof Date && r[cols[dateColI]]<TODAY)
-        .sort((a,b)=>b[cols[dateColI]]-a[cols[dateColI]]);
-      if(past.length) {
-        targetDate = past[0][cols[dateColI]];
-        targetRows = rows.filter(r=>sameDay(r[cols[dateColI]], targetDate));
-      }
-    }
-  } else {
-    targetRows = rows.slice(-8);
-  }
+        <footer class="mt-12 text-center space-y-2">
+            <div class="flex items-center justify-center gap-2 text-slate-300">
+                <div class="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse"></div>
+                <span class="text-[10px] font-bold uppercase tracking-widest">Real-time Dashboard</span>
+            </div>
+            <a href="https://docs.google.com/spreadsheets/d/1u25ZzFmpIy51tpL6xwfGQ7ndZI6n1RsliWgXlDgvRfI/edit" target="_blank" class="text-xs text-blue-500/60 hover:text-blue-600 font-medium transition-colors">View Source Spreadsheet</a>
+        </footer>
+    </div>
 
-  /* Date label */
-  const dateLbl = document.getElementById('lesson-date');
-  if(targetDate) {
-    dateLbl.textContent = `Showing: ${fmtDate(targetDate)}`;
-  } else if(dateColI>=0) {
-    dateLbl.textContent = fmtDate(TODAY);
-  }
+    <script>
+        const SHEET_ID = '1u25ZzFmpIy51tpL6xwfGQ7ndZI6n1RsliWgXlDgvRfI';
+        const GID_DAILY = '1439989763';
+        const GID_NOTICE = '502021398';
 
-  /* Content columns: everything that isn't date/subject/WAH */
-  const skipIdx = new Set([dateColI,subjectColI,wahColI].filter(i=>i>=0));
-  const contentCols = cols.filter((_,i)=>
-    !skipIdx.has(i) && cols[i] && !cols[i].startsWith('_')
-  );
+        let dailyData = [];
+        let noticeData = "";
+        let selectedDateStr = "";
 
-  /* Build table */
-  if(!targetRows.length) {
-    tableArea.innerHTML = `<div class="empty">
-      <span class="empty-icon">📅</span>
-      No lessons for today yet — check back later!
-    </div>`;
-  } else {
-    const thead = `<thead><tr>
-      <th class="th-subject">Subject</th>
-      ${contentCols.map(c=>`<th>${esc(c)}</th>`).join('')}
-      ${wahColI>=0?'<th class="th-wah">📝 Work at Home</th>':''}
-    </tr></thead>`;
+        async function fetchData() {
+            const icon = document.getElementById('refresh-icon');
+            icon.classList.add('animate-spin');
+            
+            try {
+                const dailyUrl = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=${GID_DAILY}`;
+                const noticeUrl = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=${GID_NOTICE}`;
 
-    const tbody = targetRows.map(row => {
-      const subj = subjectColI>=0 ? String(row[cols[subjectColI]]||'').trim() : '';
-      const {key,emoji} = subjectMeta(subj);
-      const wahVal = wahColI>=0 ? String(row[cols[wahColI]]||'').trim() : '';
+                const [dailyRes, noticeRes] = await Promise.all([
+                    fetch(dailyUrl).then(res => res.text()),
+                    fetch(noticeUrl).then(res => res.text())
+                ]);
 
-      const contentCells = contentCols.map(c => {
-        const v = row[c];
-        const display = v instanceof Date ? fmtDate(v) : String(v||'');
-        return `<td class="td-content">${esc(display)}</td>`;
-      }).join('');
+                parseDailyData(dailyRes);
+                parseNoticeData(noticeRes);
+                
+                document.getElementById('last-updated').innerText = 'Updated: ' + new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                renderApp();
+            } catch (error) {
+                console.error("Fetch error:", error);
+            } finally {
+                setTimeout(() => icon.classList.remove('animate-spin'), 500);
+            }
+        }
 
-      const wahCell = wahColI>=0
-        ? `<td class="td-wah">${wahVal
-            ? `<span class="wah-text-cell">${esc(wahVal)}</span>`
-            : `<span class="no-wah">—</span>`
-          }</td>`
-        : '';
+        function parseDailyData(csv) {
+            const results = Papa.parse(csv, { header: false }).data;
+            let currentDay = null;
+            let processed = [];
 
-      return `<tr class="row-${key}">
-        <td class="td-subject">
-          <div class="subject-cell">
-            <span class="s-emoji">${emoji}</span>
-            <span class="s-name">${esc(subj||'Lesson')}</span>
-          </div>
-        </td>
-        ${contentCells}
-        ${wahCell}
-      </tr>`;
-    }).join('');
+            for (let i = 1; i < results.length; i++) {
+                const row = results[i];
+                if (!row || row.length < 2) continue;
 
-    tableArea.innerHTML = `<table class="lesson-table">${thead}<tbody>${tbody}</tbody></table>`;
-  }
+                const dateVal = row[0] ? row[0].trim() : "";
+                const component = row[1] ? row[1].trim() : "";
 
-  /* Build WAH panel */
-  if(wahColI<0) {
-    wahList.innerHTML = `<div class="wah-empty">
-      <span class="wah-empty-emoji">🔍</span>
-      No WAH column found.<br>
-      <small style="font-size:11px">Detected columns: ${cols.filter(c=>c&&!c.startsWith('_')).join(', ')}</small>
-    </div>`;
-  } else {
-    const wahItems = targetRows
-      .map(r=>({
-        subject: subjectColI>=0 ? String(r[cols[subjectColI]]||'').trim() : '',
-        text:    String(r[cols[wahColI]]||'').trim()
-      }))
-      .filter(x=>x.text);
+                if (dateVal && dateVal.toLowerCase() !== 'date' && dateVal.toLowerCase() !== 'component') {
+                    currentDay = dateVal;
+                }
 
-    if(!wahItems.length) {
-      wahList.innerHTML = `<div class="wah-empty">
-        <span class="wah-empty-emoji">🎉</span>
-        No homework today!
-      </div>`;
-    } else {
-      wahBadge.textContent = `${wahItems.length} task${wahItems.length>1?'s':''}`;
-      wahBadge.style.display = '';
-      wahList.innerHTML = wahItems.map(item=>{
-        const {key,emoji} = subjectMeta(item.subject);
-        return `<div class="wah-item">
-          <span class="wah-item-emoji">${emoji}</span>
-          <div class="wah-item-content">
-            ${item.subject?`<div class="wah-item-subject">${esc(item.subject)}</div>`:''}
-            <div class="wah-item-text">${esc(item.text)}</div>
-          </div>
-        </div>`;
-      }).join('');
-    }
-  }
-}
+                if (currentDay && component) {
+                    processed.push({
+                        date: currentDay,
+                        component: component,
+                        morningCircle: row[2] || "",
+                        art: row[3] || "",
+                        english: row[4] || "",
+                        other: row.slice(5).filter(c => c && c.trim()).join(" | ")
+                    });
+                }
+            }
+            dailyData = processed;
+            
+            // Default to the first date if not set
+            if (!selectedDateStr && dailyData.length > 0) {
+                selectedDateStr = dailyData[0].date;
+            }
+        }
 
-/* ── ANNOUNCEMENTS ───────────────────────────────────── */
-async function loadAnnouncements() {
-  const el   = document.getElementById('ann-container');
-  const data = await fetchSheet(SHEETS.announcements);
+        function parseNoticeData(csv) {
+            const results = Papa.parse(csv, { header: false }).data;
+            let html = "";
+            results.forEach(row => {
+                const text = row.filter(c => c && c.trim()).join(" ");
+                if (text.trim()) {
+                    if (text.includes("Class Notice Board")) {
+                        html += `<h3 class="font-bold text-blue-900 mb-2">${text}</h3>`;
+                    } else {
+                        html += `<p class="text-blue-800/80 mb-3 last:mb-0">${text}</p>`;
+                    }
+                }
+            });
+            noticeData = html || "No current announcements.";
+        }
 
-  if(!data) {
-    el.innerHTML = '<div class="ann-card"><div class="empty" style="padding:12px 0">Unavailable.</div></div>';
-    return;
-  }
+        function renderApp() {
+            document.getElementById('loading').classList.add('hidden');
+            document.getElementById('dashboard-view').classList.remove('hidden');
+            
+            renderDateNav();
+            updateDisplay();
+            
+            document.getElementById('notice-content').innerHTML = noticeData;
+            lucide.createIcons();
+        }
 
-  const {cols,rows} = parseTable(data);
-  if(!rows.length) {
-    el.innerHTML = '<div class="ann-card"><div class="empty" style="padding:12px 0">No announcements.</div></div>';
-    return;
-  }
+        function renderDateNav() {
+            const nav = document.getElementById('date-nav');
+            nav.innerHTML = "";
+            
+            const uniqueDates = [...new Set(dailyData.map(d => d.date))];
+            
+            uniqueDates.forEach(dateStr => {
+                const btn = document.createElement('button');
+                const isActive = dateStr === selectedDateStr;
+                btn.className = `date-btn px-5 py-2.5 rounded-2xl text-sm font-bold border transition-all flex-shrink-0 ${isActive ? 'date-active border-blue-600' : 'bg-white text-slate-500 border-slate-100 hover:border-slate-300'}`;
+                btn.innerText = dateStr;
+                btn.onclick = () => {
+                    selectedDateStr = dateStr;
+                    renderDateNav();
+                    updateDisplay();
+                };
+                nav.appendChild(btn);
+            });
+        }
 
-  const dateColI = cols.findIndex(c=>c.toLowerCase().includes('date'));
-  const sorted   = dateColI>=0
-    ? [...rows].sort((a,b)=>{
-        const da=a[cols[dateColI]],db=b[cols[dateColI]];
-        return (da instanceof Date&&db instanceof Date)?db-da:0;
-      })
-    : [...rows].reverse();
+        function updateDisplay() {
+            document.getElementById('display-date').innerText = selectedDateStr;
+            
+            const dayEntries = dailyData.filter(d => d.date === selectedDateStr);
+            const wah = dayEntries.find(d => d.component.toLowerCase().includes('wah'));
+            const lesson = dayEntries.find(d => d.component.toLowerCase().includes('lesson'));
 
-  const cards = sorted.slice(0,9).map(row=>{
-    const dateVal = dateColI>=0?row[cols[dateColI]]:null;
-    const dateStr = dateVal instanceof Date ? fmtDate(dateVal) : '';
-    const texts   = cols
-      .filter((_,i)=>i!==dateColI)
-      .map(c=>String(row[c]||'').trim())
-      .filter(Boolean);
-    if(!texts.length) return '';
-    return `<div class="ann-card">
-      ${dateStr?`<div class="ann-date">${esc(dateStr)}</div>`:''}
-      <div class="ann-text">${esc(texts.join('\n'))}</div>
-    </div>`;
-  }).filter(Boolean).join('');
+            // Update WAH
+            const wahContainer = document.getElementById('wah-content');
+            if (wah) {
+                let html = "";
+                const fields = [
+                    { label: 'Morning Circle', val: wah.morningCircle },
+                    { label: 'English', val: wah.english },
+                    { label: 'Art', val: wah.art },
+                    { label: 'Details', val: wah.other }
+                ];
+                fields.forEach(f => {
+                    if (f.val && f.val.trim()) {
+                        html += `<div><span class="font-bold text-amber-900/40 text-[10px] uppercase block mb-0.5">${f.label}</span><p class="text-amber-900/80">${f.val}</p></div>`;
+                    }
+                });
+                wahContainer.innerHTML = html || "<p class='text-slate-400 italic'>No specific tasks listed.</p>";
+            } else {
+                wahContainer.innerHTML = "<p class='text-slate-400 italic'>No WAH listed for this date.</p>";
+            }
 
-  el.innerHTML = cards ||
-    '<div class="ann-card"><div class="empty" style="padding:12px 0">No announcements at this time.</div></div>';
-}
+            // Update Lessons
+            const lessonContainer = document.getElementById('lessons-content');
+            lessonContainer.innerHTML = "";
+            if (lesson) {
+                const fields = [
+                    { label: 'Morning Circle', val: lesson.morningCircle },
+                    { label: 'English', val: lesson.english },
+                    { label: 'Art', val: lesson.art },
+                    { label: 'Other', val: lesson.other }
+                ];
+                fields.forEach(f => {
+                    if (f.val && f.val.trim()) {
+                        const div = document.createElement('div');
+                        div.className = "group";
+                        div.innerHTML = `
+                            <div class="flex items-center gap-2 mb-1.5">
+                                <div class="w-1.5 h-1.5 rounded-full bg-emerald-400"></div>
+                                <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">${f.label}</span>
+                            </div>
+                            <p class="text-slate-700 leading-relaxed pl-3.5 border-l border-slate-100">${f.val}</p>
+                        `;
+                        lessonContainer.appendChild(div);
+                    }
+                });
+            } else {
+                lessonContainer.innerHTML = "<p class='text-slate-400 italic'>No lesson plan details available.</p>";
+            }
 
-/* ── TIMETABLE ───────────────────────────────────────── */
-async function loadTimetable() {
-  const el   = document.getElementById('timetable-body');
-  const data = await fetchSheet(SHEETS.timetable);
+            lucide.createIcons();
+        }
 
-  if(!data) {
-    el.innerHTML = '<div class="empty" style="padding:10px 0">Timetable unavailable.</div>';
-    return;
-  }
-
-  const {cols,rows} = parseTable(data);
-  if(!rows.length) {
-    el.innerHTML = '<div class="empty" style="padding:10px 0">No timetable data yet.</div>';
-    return;
-  }
-
-  const vis = cols.filter(c=>c&&!c.startsWith('_'));
-  el.innerHTML = `<div class="tt-wrap">
-    <table class="tt-table">
-      <thead><tr>${vis.map(c=>`<th>${esc(c)}</th>`).join('')}</tr></thead>
-      <tbody>
-        ${rows.map(row=>
-          `<tr>${vis.map(c=>{
-            const v=row[c];
-            return `<td>${v instanceof Date?fmtDate(v):esc(String(v||''))}</td>`;
-          }).join('')}</tr>`
-        ).join('')}
-      </tbody>
-    </table>
-  </div>`;
-}
-
-/* ── LOAD ALL ────────────────────────────────────────── */
-async function loadAll() {
-  document.getElementById('refresh-icon').textContent = '⏳';
-  document.getElementById('status-text').textContent  = 'Fetching…';
-  try {
-    await Promise.all([loadNotice(), loadLessons(), loadAnnouncements(), loadTimetable()]);
-    const t = new Date().toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'});
-    document.getElementById('status-text').textContent = `Live · Updated ${t}`;
-  } catch {
-    document.getElementById('status-text').textContent = 'Update failed — tap Refresh';
-  }
-  document.getElementById('refresh-icon').textContent = '↻';
-}
-
-loadAll();
-setInterval(loadAll, 5*60*1000);
-</script>
+        // Auto-refresh every 5 minutes
+        setInterval(fetchData, 300000);
+        
+        // Initial fetch
+        fetchData();
+    </script>
 </body>
 </html>
