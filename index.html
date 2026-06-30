@@ -40,6 +40,7 @@
         .dark .has-wah { border-color: #fbbf24 !important; color: #fbbf24; }
         .announcement-item { border-left: 3px solid #3b82f6; padding-left: 12px; margin-bottom: 12px; }
         .card { transition: background-color 0.3s, box-shadow 0.3s; }
+        .subject-tag { font-size: 0.65rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; padding: 2px 8px; border-radius: 4px; display: inline-block; margin-bottom: 4px; }
     </style>
 </head>
 <body class="pb-24 bg-slate-50 text-slate-900 dark:bg-dark-bg dark:text-dark-text">
@@ -88,10 +89,6 @@
                         </div>
                     </div>
                     <div class="overflow-x-auto whitespace-nowrap py-2 no-scrollbar flex gap-2" id="date-nav"></div>
-                    <div class="flex gap-4 mt-2 px-1">
-                        <div class="flex items-center gap-1.5"><div class="w-2 h-2 rounded-full bg-blue-600"></div><span class="text-[9px] font-bold text-slate-400 uppercase">Selected</span></div>
-                        <div class="flex items-center gap-1.5"><div class="w-2 h-2 rounded border border-amber-500"></div><span class="text-[9px] font-bold text-slate-400 uppercase">Has WAH</span></div>
-                    </div>
                 </div>
 
                 <!-- Date Header -->
@@ -106,7 +103,7 @@
                         <i data-lucide="home" class="w-4 h-4 text-amber-500"></i>
                         <span class="text-xs font-bold text-slate-500 dark:text-dark-muted uppercase tracking-wider">Work at Home</span>
                     </div>
-                    <div id="wah-content" class="text-sm space-y-3"></div>
+                    <div id="wah-content" class="text-sm space-y-4"></div>
                 </section>
 
                 <!-- Lessons Card -->
@@ -115,7 +112,7 @@
                         <i data-lucide="book-open" class="w-4 h-4 text-emerald-500"></i>
                         <span class="text-xs font-bold text-slate-500 dark:text-dark-muted uppercase tracking-wider">Today's Lessons</span>
                     </div>
-                    <div id="lessons-content" class="space-y-5"></div>
+                    <div id="lessons-content" class="space-y-6"></div>
                 </section>
             </div>
 
@@ -141,6 +138,19 @@
         const SHEET_ID = '1u25ZzFmpIy51tpL6xwfGQ7ndZI6n1RsliWgXlDgvRfI';
         const GID_DAILY = '1439989763';
         const GID_NOTICE = '502021398';
+
+        // Subject mapping based on sheet columns
+        const SUBJECTS = [
+            { id: 'morningCircle', label: 'Morning Circle', color: 'bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300' },
+            { id: 'art', label: 'Art', color: 'bg-purple-100 text-purple-700 dark:bg-purple-900/40 dark:text-purple-300' },
+            { id: 'english', label: 'English', color: 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-300' },
+            { id: 'evlf', label: 'EVLF', color: 'bg-pink-100 text-pink-700 dark:bg-pink-900/40 dark:text-pink-300' },
+            { id: 'library', label: 'Library', color: 'bg-orange-100 text-orange-700 dark:bg-orange-900/40 dark:text-orange-300' },
+            { id: 'numeracy', label: 'Numeracy', color: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300' },
+            { id: 'sports', label: 'Sports', color: 'bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300' },
+            { id: 'thematic', label: 'Thematic', color: 'bg-cyan-100 text-cyan-700 dark:bg-cyan-900/40 dark:text-cyan-300' },
+            { id: 'skillsHandwork', label: 'Skills & Handwork', color: 'bg-teal-100 text-teal-700 dark:bg-teal-900/40 dark:text-teal-300' }
+        ];
 
         let dailyData = [];
         let noticeData = [];
@@ -205,26 +215,30 @@
                         morningCircle: row[2] || "",
                         art: row[3] || "",
                         english: row[4] || "",
-                        other: row.slice(5).filter(c => c && c.trim()).join(" | ")
+                        evlf: row[5] || "",
+                        library: row[6] || "",
+                        numeracy: row[7] || "",
+                        sports: row[8] || "",
+                        thematic: row[9] || "",
+                        skillsHandwork: row[10] || ""
                     });
                 }
             }
 
-            // Group by date and sort chronologically
             const grouped = {};
             processed.forEach(item => {
                 if (!grouped[item.date]) grouped[item.date] = [];
                 grouped[item.date].push(item);
             });
 
-            // Convert date strings to Date objects for sorting
-            // Format in sheet: "Mon, 22 Jun" -> we assume 2026 based on title
             const parseDate = (str) => {
-                const parts = str.split(',')[1].trim().split(' ');
-                const day = parseInt(parts[0]);
-                const monthNames = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-                const month = monthNames.indexOf(parts[1]);
-                return new Date(2026, month, day);
+                try {
+                    const parts = str.split(',')[1].trim().split(' ');
+                    const day = parseInt(parts[0]);
+                    const monthNames = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+                    const month = monthNames.indexOf(parts[1]);
+                    return new Date(2026, month, day);
+                } catch(e) { return new Date(0); }
             };
 
             const sortedDates = Object.keys(grouped).sort((a, b) => parseDate(a) - parseDate(b));
@@ -233,7 +247,7 @@
                 date: date,
                 timestamp: parseDate(date),
                 entries: grouped[date],
-                hasWAH: grouped[date].some(e => e.component.toLowerCase().includes('wah') && (e.morningCircle || e.english || e.art || e.other))
+                hasWAH: grouped[date].some(e => e.component.toLowerCase().includes('wah') && SUBJECTS.some(s => e[s.id] && e[s.id].trim()))
             }));
 
             if (!selectedDateStr) {
@@ -280,11 +294,8 @@
         function jumpToToday(shouldRender = true) {
             const now = new Date();
             now.setHours(0,0,0,0);
-            
-            // Find the closest date to today (past or future)
             let closest = dailyData[0];
             let minDiff = Infinity;
-            
             dailyData.forEach(d => {
                 const diff = Math.abs(d.timestamp - now);
                 if (diff < minDiff) {
@@ -292,7 +303,6 @@
                     closest = d;
                 }
             });
-
             if (closest) {
                 selectedDateStr = closest.date;
                 if (shouldRender) {
@@ -318,7 +328,6 @@
         function renderDateNav() {
             const nav = document.getElementById('date-nav');
             nav.innerHTML = "";
-            
             dailyData.forEach(day => {
                 const btn = document.createElement('button');
                 const isActive = day.date === selectedDateStr;
@@ -331,7 +340,6 @@
                 };
                 nav.appendChild(btn);
             });
-            
             const activeBtn = nav.querySelector('.date-active');
             if (activeBtn) activeBtn.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
         }
@@ -344,34 +352,39 @@
             const wah = day.entries.find(e => e.component.toLowerCase().includes('wah'));
             const lesson = day.entries.find(e => e.component.toLowerCase().includes('lesson'));
 
-            // WAH
+            // Render WAH
             const wahContainer = document.getElementById('wah-content');
-            if (wah && (wah.morningCircle || wah.english || wah.art || wah.other)) {
-                let html = "";
-                const fields = [{l:'Circle', v:wah.morningCircle}, {l:'English', v:wah.english}, {l:'Art', v:wah.art}, {l:'Details', v:wah.other}];
-                fields.forEach(f => {
-                    if (f.v && f.v.trim()) html += `<div><span class="text-[9px] font-black text-amber-500 uppercase block">${f.l}</span><p class="text-slate-600 dark:text-slate-300 font-medium">${f.v}</p></div>`;
-                });
-                wahContainer.innerHTML = html;
-            } else {
-                wahContainer.innerHTML = "<p class='text-slate-400 dark:text-dark-muted italic'>No specific tasks for this date.</p>";
-            }
-
-            // Lessons
-            const lessonContainer = document.getElementById('lessons-content');
-            lessonContainer.innerHTML = "";
-            if (lesson) {
-                const fields = [{l:'Morning Circle', v:lesson.morningCircle}, {l:'English', v:lesson.english}, {l:'Art', v:lesson.art}, {l:'Other', v:lesson.other}];
-                fields.forEach(f => {
-                    if (f.v && f.v.trim()) {
-                        const div = document.createElement('div');
-                        div.innerHTML = `<div class="flex items-center gap-2 mb-1"><div class="w-1 h-1 rounded-full bg-emerald-400"></div><span class="text-[9px] font-bold text-slate-400 dark:text-dark-muted uppercase tracking-tighter">${f.l}</span></div><p class="text-slate-700 dark:text-slate-300 text-sm leading-relaxed pl-3 border-l border-slate-100 dark:border-slate-800">${f.v}</p>`;
-                        lessonContainer.appendChild(div);
+            let wahHtml = "";
+            if (wah) {
+                SUBJECTS.forEach(sub => {
+                    const val = wah[sub.id];
+                    if (val && val.trim()) {
+                        wahHtml += `
+                            <div>
+                                <span class="subject-tag ${sub.color}">${sub.label}</span>
+                                <p class="text-slate-600 dark:text-slate-300 font-medium pl-1">${val}</p>
+                            </div>`;
                     }
                 });
-            } else {
-                lessonContainer.innerHTML = "<p class='text-slate-400 dark:text-dark-muted italic'>No lesson details available.</p>";
             }
+            wahContainer.innerHTML = wahHtml || "<p class='text-slate-400 dark:text-dark-muted italic'>No WAH for this date.</p>";
+
+            // Render Lessons
+            const lessonContainer = document.getElementById('lessons-content');
+            let lessonHtml = "";
+            if (lesson) {
+                SUBJECTS.forEach(sub => {
+                    const val = lesson[sub.id];
+                    if (val && val.trim()) {
+                        lessonHtml += `
+                            <div class="border-l-2 border-slate-100 dark:border-slate-800 pl-4 py-1">
+                                <span class="subject-tag ${sub.color}">${sub.label}</span>
+                                <p class="text-slate-700 dark:text-slate-300 text-sm leading-relaxed mt-1">${val}</p>
+                            </div>`;
+                    }
+                });
+            }
+            lessonContainer.innerHTML = lessonHtml || "<p class='text-slate-400 dark:text-dark-muted italic'>No lesson details.</p>";
         }
 
         function renderContacts() {
